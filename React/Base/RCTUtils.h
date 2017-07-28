@@ -19,9 +19,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 // JSON serialization/deserialization
-RCT_EXTERN NSString *__nullable RCTJSONStringify(id __nullable jsonObject, NSError **error);
-RCT_EXTERN id __nullable RCTJSONParse(NSString *__nullable jsonString, NSError **error);
-RCT_EXTERN id __nullable RCTJSONParseMutable(NSString *__nullable jsonString, NSError **error);
+RCT_EXTERN NSString *_Nullable RCTJSONStringify(id _Nullable jsonObject, NSError **error);
+RCT_EXTERN id _Nullable RCTJSONParse(NSString *_Nullable jsonString, NSError **error);
+RCT_EXTERN id _Nullable RCTJSONParseMutable(NSString *_Nullable jsonString, NSError **error);
 
 // Sanitize a JSON object by stripping invalid types and/or NaN values
 RCT_EXTERN id RCTJSONClean(id object);
@@ -63,10 +63,10 @@ RCT_EXTERN BOOL RCTClassOverridesClassMethod(Class cls, SEL selector);
 RCT_EXTERN BOOL RCTClassOverridesInstanceMethod(Class cls, SEL selector);
 
 // Creates a standardized error object to return in callbacks
-RCT_EXTERN NSDictionary<NSString *, id> *RCTMakeError(NSString *message, id __nullable toStringify, NSDictionary<NSString *, id> *__nullable extraData);
-RCT_EXTERN NSDictionary<NSString *, id> *RCTMakeAndLogError(NSString *message, id __nullable toStringify, NSDictionary<NSString *, id> *__nullable extraData);
+RCT_EXTERN NSDictionary<NSString *, id> *RCTMakeError(NSString *message, id _Nullable toStringify, NSDictionary<NSString *, id> *_Nullable extraData);
+RCT_EXTERN NSDictionary<NSString *, id> *RCTMakeAndLogError(NSString *message, id _Nullable toStringify, NSDictionary<NSString *, id> *_Nullable extraData);
 RCT_EXTERN NSDictionary<NSString *, id> *RCTJSErrorFromNSError(NSError *error);
-RCT_EXTERN NSDictionary<NSString *, id> *RCTJSErrorFromCodeMessageAndNSError(NSString *code, NSString *message, NSError *__nullable error);
+RCT_EXTERN NSDictionary<NSString *, id> *RCTJSErrorFromCodeMessageAndNSError(NSString *code, NSString *message, NSError *_Nullable error);
 
 // The default error code to use as the `code` property for callback error objects
 RCT_EXTERN NSString *const RCTErrorUnspecified;
@@ -78,15 +78,15 @@ RCT_EXTERN BOOL RCTRunningInTestEnvironment(void);
 RCT_EXTERN BOOL RCTRunningInAppExtension(void);
 
 // Returns the shared UIApplication instance, or nil if running in an App Extension
-RCT_EXTERN UIApplication *__nullable RCTSharedApplication(void);
+RCT_EXTERN UIApplication *_Nullable RCTSharedApplication(void);
 
 // Returns the current main window, useful if you need to access the root view
 // or view controller
-RCT_EXTERN UIWindow *__nullable RCTKeyWindow(void);
+RCT_EXTERN UIWindow *_Nullable RCTKeyWindow(void);
 
 // Returns the presented view controller, useful if you need
 // e.g. to present a modal view controller or alert over it
-RCT_EXTERN UIViewController *__nullable RCTPresentedViewController(void);
+RCT_EXTERN UIViewController *_Nullable RCTPresentedViewController(void);
 
 // Does this device support force touch (aka 3D Touch)?
 RCT_EXTERN BOOL RCTForceTouchAvailable(void);
@@ -108,21 +108,21 @@ RCT_EXTERN double RCTSanitizeNaNValue(double value, NSString *property);
 RCT_EXTERN NSURL *RCTDataURL(NSString *mimeType, NSData *data);
 
 // Gzip functionality - compression level in range 0 - 1 (-1 for default)
-RCT_EXTERN NSData *__nullable RCTGzipData(NSData *__nullable data, float level);
+RCT_EXTERN NSData *_Nullable RCTGzipData(NSData *_Nullable data, float level);
 
 // Returns the relative path within the main bundle for an absolute URL
 // (or nil, if the URL does not specify a path within the main bundle)
-RCT_EXTERN NSString *__nullable RCTBundlePathForURL(NSURL *__nullable URL);
+RCT_EXTERN NSString *_Nullable RCTBundlePathForURL(NSURL *_Nullable URL);
 
 // Determines if a given image URL refers to a local image
-RCT_EXTERN BOOL RCTIsLocalAssetURL(NSURL *__nullable imageURL);
+RCT_EXTERN BOOL RCTIsLocalAssetURL(NSURL *_Nullable imageURL);
 
 // Returns an UIImage for a local image asset. Returns nil if the URL
 // does not correspond to a local asset.
-RCT_EXTERN UIImage *__nullable RCTImageFromLocalAssetURL(NSURL *imageURL);
+RCT_EXTERN UIImage *_Nullable RCTImageFromLocalAssetURL(NSURL *imageURL);
 
 // Creates a new, unique temporary file path with the specified extension
-RCT_EXTERN NSString *__nullable RCTTempFilePath(NSString *__nullable extension, NSError **error);
+RCT_EXTERN NSString *_Nullable RCTTempFilePath(NSString *_Nullable extension, NSError **error);
 
 // Converts a CGColor to a hex string
 RCT_EXTERN NSString *RCTColorToHexString(CGColorRef color);
@@ -131,7 +131,7 @@ RCT_EXTERN NSString *RCTColorToHexString(CGColorRef color);
 RCT_EXTERN NSString *RCTUIKitLocalizedString(NSString *string);
 
 // URL manipulation
-RCT_EXTERN NSString *__nullable RCTGetURLQueryParam(NSURL *__nullable URL, NSString *param);
-RCT_EXTERN NSURL *__nullable RCTURLByReplacingQueryParam(NSURL *__nullable URL, NSString *param, NSString *__nullable value);
+RCT_EXTERN NSString *_Nullable RCTGetURLQueryParam(NSURL *_Nullable URL, NSString *param);
+RCT_EXTERN NSURL *_Nullable RCTURLByReplacingQueryParam(NSURL *_Nullable URL, NSString *param, NSString *_Nullable value);
 
 NS_ASSUME_NONNULL_END

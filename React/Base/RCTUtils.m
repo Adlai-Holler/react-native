@@ -24,7 +24,7 @@
 
 NSString *const RCTErrorUnspecified = @"EUNSPECIFIED";
 
-static NSString *__nullable _RCTJSONStringifyNoRetry(id __nullable jsonObject, NSError **error)
+static NSString *_Nullable _RCTJSONStringifyNoRetry(id _Nullable jsonObject, NSError **error)
 {
   if (!jsonObject) {
     return nil;
@@ -69,7 +69,7 @@ static NSString *__nullable _RCTJSONStringifyNoRetry(id __nullable jsonObject, N
   }
 }
 
-NSString *__nullable RCTJSONStringify(id __nullable jsonObject, NSError **error)
+NSString *_Nullable RCTJSONStringify(id _Nullable jsonObject, NSError **error)
 {
   if (error) {
     return _RCTJSONStringifyNoRetry(jsonObject, error);
@@ -87,7 +87,7 @@ NSString *__nullable RCTJSONStringify(id __nullable jsonObject, NSError **error)
   }
 }
 
-static id __nullable _RCTJSONParse(NSString *__nullable jsonString, BOOL mutable, NSError **error)
+static id _Nullable _RCTJSONParse(NSString *_Nullable jsonString, BOOL mutable, NSError **error)
 {
   static SEL JSONKitSelector = NULL;
   static SEL JSONKitMutableSelector = NULL;
@@ -146,12 +146,12 @@ static id __nullable _RCTJSONParse(NSString *__nullable jsonString, BOOL mutable
   return nil;
 }
 
-id __nullable RCTJSONParse(NSString *__nullable jsonString, NSError **error)
+id _Nullable RCTJSONParse(NSString *_Nullable jsonString, NSError **error)
 {
   return _RCTJSONParse(jsonString, NO, error);
 }
 
-id __nullable RCTJSONParseMutable(NSString *__nullable jsonString, NSError **error)
+id _Nullable RCTJSONParseMutable(NSString *_Nullable jsonString, NSError **error)
 {
   return _RCTJSONParse(jsonString, YES, error);
 }
@@ -374,8 +374,8 @@ BOOL RCTClassOverridesInstanceMethod(Class cls, SEL selector)
 }
 
 NSDictionary<NSString *, id> *RCTMakeError(NSString *message,
-                                           id __nullable toStringify,
-                                           NSDictionary<NSString *, id> *__nullable extraData)
+                                           id _Nullable toStringify,
+                                           NSDictionary<NSString *, id> *_Nullable extraData)
 {
   if (toStringify) {
     message = [message stringByAppendingString:[toStringify description]];
@@ -387,8 +387,8 @@ NSDictionary<NSString *, id> *RCTMakeError(NSString *message,
 }
 
 NSDictionary<NSString *, id> *RCTMakeAndLogError(NSString *message,
-                                                 id __nullable toStringify,
-                                                 NSDictionary<NSString *, id> *__nullable extraData)
+                                                 id _Nullable toStringify,
+                                                 NSDictionary<NSString *, id> *_Nullable extraData)
 {
   NSDictionary<NSString *, id> *error = RCTMakeError(message, toStringify, extraData);
   RCTLogError(@"\nError: %@", error);
@@ -406,7 +406,7 @@ NSDictionary<NSString *, id> *RCTJSErrorFromNSError(NSError *error)
 // TODO: Can we just replace RCTMakeError with this function instead?
 NSDictionary<NSString *, id> *RCTJSErrorFromCodeMessageAndNSError(NSString *code,
                                                                   NSString *message,
-                                                                  NSError *__nullable error)
+                                                                  NSError *_Nullable error)
 {
   NSString *errorMessage;
   NSArray<NSString *> *stackTrace = [NSThread callStackSymbols];
@@ -456,7 +456,7 @@ BOOL RCTRunningInAppExtension(void)
   return [[[[NSBundle mainBundle] bundlePath] pathExtension] isEqualToString:@"appex"];
 }
 
-UIApplication *__nullable RCTSharedApplication(void)
+UIApplication *_Nullable RCTSharedApplication(void)
 {
   if (RCTRunningInAppExtension()) {
     return nil;
@@ -464,7 +464,7 @@ UIApplication *__nullable RCTSharedApplication(void)
   return [[UIApplication class] performSelector:@selector(sharedApplication)];
 }
 
-UIWindow *__nullable RCTKeyWindow(void)
+UIWindow *_Nullable RCTKeyWindow(void)
 {
   if (RCTRunningInAppExtension()) {
     return nil;
@@ -474,7 +474,7 @@ UIWindow *__nullable RCTKeyWindow(void)
   return RCTSharedApplication().keyWindow;
 }
 
-UIViewController *__nullable RCTPresentedViewController(void)
+UIViewController *_Nullable RCTPresentedViewController(void)
 {
   if (RCTRunningInAppExtension()) {
     return nil;
@@ -531,14 +531,14 @@ NSURL *RCTDataURL(NSString *mimeType, NSData *data)
            [data base64EncodedStringWithOptions:(NSDataBase64EncodingOptions)0]]];
 }
 
-BOOL RCTIsGzippedData(NSData *__nullable); // exposed for unit testing purposes
-BOOL RCTIsGzippedData(NSData *__nullable data)
+BOOL RCTIsGzippedData(NSData *_Nullable); // exposed for unit testing purposes
+BOOL RCTIsGzippedData(NSData *_Nullable data)
 {
   UInt8 *bytes = (UInt8 *)data.bytes;
   return (data.length >= 2 && bytes[0] == 0x1f && bytes[1] == 0x8b);
 }
 
-NSData *__nullable RCTGzipData(NSData *__nullable input, float level)
+NSData *_Nullable RCTGzipData(NSData *_Nullable input, float level)
 {
   if (input.length == 0 || RCTIsGzippedData(input)) {
     return input;
@@ -581,7 +581,7 @@ NSData *__nullable RCTGzipData(NSData *__nullable input, float level)
   return output;
 }
 
-NSString *__nullable RCTBundlePathForURL(NSURL *__nullable URL)
+NSString *_Nullable RCTBundlePathForURL(NSURL *_Nullable URL)
 {
   if (!URL.fileURL) {
     // Not a file path
@@ -600,7 +600,7 @@ NSString *__nullable RCTBundlePathForURL(NSURL *__nullable URL)
   return path;
 }
 
-BOOL RCTIsLocalAssetURL(NSURL *__nullable imageURL)
+BOOL RCTIsLocalAssetURL(NSURL *_Nullable imageURL)
 {
   NSString *name = RCTBundlePathForURL(imageURL);
   if (!name) {
@@ -641,7 +641,7 @@ static NSBundle *bundleForPath(NSString *key)
   return bundleCache[key];
 }
 
-UIImage *__nullable RCTImageFromLocalAssetURL(NSURL *imageURL)
+UIImage *_Nullable RCTImageFromLocalAssetURL(NSURL *imageURL)
 {
   NSString *imageName = RCTBundlePathForURL(imageURL);
 
@@ -688,7 +688,7 @@ UIImage *__nullable RCTImageFromLocalAssetURL(NSURL *imageURL)
   return image;
 }
 
-RCT_EXTERN NSString *__nullable RCTTempFilePath(NSString *extension, NSError **error)
+RCT_EXTERN NSString *_Nullable RCTTempFilePath(NSString *extension, NSError **error)
 {
   static NSError *setupError = nil;
   static NSString *directory;
@@ -799,7 +799,7 @@ NSString *RCTUIKitLocalizedString(NSString *string)
   return UIKitBundle ? [UIKitBundle localizedStringForKey:string value:string table:nil] : string;
 }
 
-NSString *__nullable RCTGetURLQueryParam(NSURL *__nullable URL, NSString *param)
+NSString *_Nullable RCTGetURLQueryParam(NSURL *_Nullable URL, NSString *param)
 {
   RCTAssertParam(param);
   if (!URL) {
@@ -817,7 +817,7 @@ NSString *__nullable RCTGetURLQueryParam(NSURL *__nullable URL, NSString *param)
   return nil;
 }
 
-NSURL *__nullable RCTURLByReplacingQueryParam(NSURL *__nullable URL, NSString *param, NSString *__nullable value)
+NSURL *_Nullable RCTURLByReplacingQueryParam(NSURL *_Nullable URL, NSString *param, NSString *_Nullable value)
 {
   RCTAssertParam(param);
   if (!URL) {

@@ -174,7 +174,7 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(setAccessibilityContentSizeMultipliers:(NSDictionary *)JSMultipliers)
 {
   NSMutableDictionary<NSString *, NSNumber *> *multipliers = [NSMutableDictionary new];
-  for (NSString *__nonnull JSCategory in JSMultipliers) {
+  for (NSString *_Nonnull JSCategory in JSMultipliers) {
     NSNumber *m = [RCTConvert NSNumber:JSMultipliers[JSCategory]];
     NSString *UIKitCategory = [[self class] UIKitCategoryFromJSCategory:JSCategory];
     multipliers[UIKitCategory] = m;

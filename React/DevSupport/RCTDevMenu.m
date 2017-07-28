@@ -276,7 +276,7 @@ RCT_EXPORT_METHOD(show)
   [RCTPresentedViewController() presentViewController:_actionSheet animated:YES completion:nil];
 }
 
-- (RCTDevMenuAlertActionHandler)alertActionHandlerForDevItem:(RCTDevMenuItem *__nullable)item
+- (RCTDevMenuAlertActionHandler)alertActionHandlerForDevItem:(nullable RCTDevMenuItem *)item
 {
   return ^(__unused UIAlertAction *action) {
     if (item) {
