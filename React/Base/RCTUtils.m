@@ -826,15 +826,13 @@ NSURL *__nullable RCTURLByReplacingQueryParam(NSURL *__nullable URL, NSString *p
 
   NSURLComponents *components = [NSURLComponents componentsWithURL:URL
                                            resolvingAgainstBaseURL:YES];
-
-  __block NSInteger paramIndex = NSNotFound;
   NSMutableArray<NSURLQueryItem *> *queryItems = [components.queryItems mutableCopy];
-  [queryItems enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:
-   ^(NSURLQueryItem *item, NSUInteger i, BOOL *stop) {
-     if ([item.name isEqualToString:param]) {
-       paramIndex = i;
-       *stop = YES;
-     }
+
+  // Note: We could specify the concurrent flag here, but the chunk of work is too small to be worthwhile.
+  NSInteger paramIndex =
+  [queryItems indexOfObjectWithOptions:NSEnumerationReverse passingTest:
+   ^(NSURLQueryItem * item, __unused NSUInteger idx, __unused BOOL * _Nonnull stop) {
+     return [item.name isEqualToString:param];
    }];
 
   if (!value) {
