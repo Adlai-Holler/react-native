@@ -453,7 +453,12 @@ BOOL RCTRunningInTestEnvironment(void)
 
 BOOL RCTRunningInAppExtension(void)
 {
-  return [[[[NSBundle mainBundle] bundlePath] pathExtension] isEqualToString:@"appex"];
+  static BOOL isAppExtension;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    isAppExtension = [[[[NSBundle mainBundle] bundlePath] pathExtension] isEqualToString:@"appex"];
+  });
+  return isAppExtension;
 }
 
 UIApplication *__nullable RCTSharedApplication(void)

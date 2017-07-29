@@ -193,7 +193,7 @@ static RCTPropBlock createNSInvocationSetter(NSMethodSignature *typeSignature, S
   // Get type
   SEL type = NULL;
   NSString *keyPath = nil;
-  SEL selector = NSSelectorFromString([NSString stringWithFormat:@"propConfig%@_%@", isShadowView ? @"Shadow" : @"", name]);
+  SEL selector = NSSelectorFromString([NSString stringWithFormat:@"propConfig%s_%@", isShadowView ? "Shadow" : "", name]);
   if ([_managerClass respondsToSelector:selector]) {
     NSArray<NSString *> *typeAndKeyPath = ((NSArray<NSString *> *(*)(id, SEL))objc_msgSend)(_managerClass, selector);
     type = RCTConvertSelectorForType(typeAndKeyPath[0]);
@@ -236,13 +236,13 @@ static RCTPropBlock createNSInvocationSetter(NSMethodSignature *typeSignature, S
 
     // Build setter block
     void (^setterBlock)(id target, id json) = nil;
-    if (type == NSSelectorFromString(@"RCTBubblingEventBlock:") ||
-        type == NSSelectorFromString(@"RCTDirectEventBlock:")) {
+    if (type == sel_getUid("RCTBubblingEventBlock:") ||
+        type == sel_getUid("RCTDirectEventBlock:")) {
       // Special case for event handlers
       setterBlock = createEventSetter(name, setter, _bridge);
     } else {
       // Ordinary property handlers
-      NSMethodSignature *typeSignature = [[RCTConvert class] methodSignatureForSelector:type];
+      NSMethodSignature *typeSignature = [RCTConvert methodSignatureForSelector:type];
       if (!typeSignature) {
         RCTLogError(@"No +[RCTConvert %@] function found.", NSStringFromSelector(type));
         return ^(__unused id<RCTComponent> view, __unused id json){};
@@ -386,7 +386,7 @@ static RCTPropBlock createNSInvocationSetter(NSMethodSignature *typeSignature, S
   for (unsigned int i = 0; i < count; i++) {
     SEL selector = method_getName(methods[i]);
     const char *selectorName = sel_getName(selector);
-    if (strncmp(selectorName, "propConfig", strlen("propConfig")) != 0) {
+    if (!sel_isEqual(selector, sel_getUid("propConfig"))) {
       continue;
     }
 

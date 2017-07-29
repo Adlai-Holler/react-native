@@ -160,7 +160,7 @@ NSString *RCTFormatLog(
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
       formatter = [NSDateFormatter new];
-      formatter.dateFormat = formatter.dateFormat = @"yyyy-MM-dd HH:mm:ss.SSS ";
+      formatter.dateFormat = @"yyyy-MM-dd HH:mm:ss.SSS ";
     });
     [log appendString:[formatter stringFromDate:timestamp]];
   }

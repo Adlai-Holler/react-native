@@ -368,7 +368,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
     _lastScrollDispatchTime = 0;
     _cachedChildFrames = [NSMutableArray new];
 
-    _scrollListeners = [NSHashTable weakObjectsHashTable];
+    _scrollListeners = [NSHashTable hashTableWithOptions:NSHashTableWeakMemory | NSHashTableObjectPointerPersonality];
 
     [self addSubview:_scrollView];
   }

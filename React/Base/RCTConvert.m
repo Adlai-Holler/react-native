@@ -90,7 +90,7 @@ RCT_CUSTOM_CONVERTER(NSData *, NSData, [json dataUsingEncoding:NSUTF8StringEncod
     }
 
     // Check if it has a scheme
-    if ([path rangeOfString:@":"].location != NSNotFound) {
+    if ([path containsString:@":"]) {
       path = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
       URL = [NSURL URLWithString:path];
       if (URL) {
@@ -399,8 +399,9 @@ RCT_ENUM_CONVERTER(UIBarStyle, (@{
 #endif
 
 // TODO: normalise the use of w/width so we can do away with the alias values (#6566645)
-static void RCTConvertCGStructValue(const char *type, NSArray *fields, NSDictionary *aliases, CGFloat *result, id json)
+static void RCTConvertCGStructValue(const char *type, NSArray *fields, NSDictionary *aliases, CGFloat *result, id jsonArg)
 {
+  __block id json = jsonArg;
   NSUInteger count = fields.count;
   if ([json isKindOfClass:[NSArray class]]) {
     if (RCT_DEBUG && [json count] != count) {
@@ -533,9 +534,7 @@ NSArray *RCTConvertArrayValue(SEL type, id json)
     } else if (value != jsonValue) {
       // Converted value is different, so we'll need to copy the array
       values = [[NSMutableArray alloc] initWithCapacity:values.count];
-      for (NSUInteger i = 0; i < idx; i++) {
-        [(NSMutableArray *)values addObject:json[i]];
-      }
+      CFArrayAppendArray((CFMutableArrayRef)values, (CFArrayRef)json, CFRangeMake(0, idx));
       if (value) {
         [(NSMutableArray *)values addObject:value];
       }
@@ -613,9 +612,7 @@ static id RCTConvertPropertyListValue(id json)
       } else if (value != jsonValue) {
         // Converted value is different, so we'll need to copy the array
         values = [[NSMutableArray alloc] initWithCapacity:values.count];
-        for (NSUInteger i = 0; i < idx; i++) {
-          [(NSMutableArray *)values addObject:json[i]];
-        }
+        CFArrayAppendArray((CFMutableArrayRef)values, (CFArrayRef)json, CFRangeMake(0, idx));
         if (value) {
           [(NSMutableArray *)values addObject:value];
         }

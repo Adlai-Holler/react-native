@@ -18,7 +18,7 @@
 - (instancetype)init
 {
   if (self = [super init]) {
-    _observers = [[NSHashTable alloc] initWithOptions:NSHashTableWeakMemory capacity:0];
+    _observers = [NSHashTable hashTableWithOptions:NSHashTableWeakMemory | NSHashTableObjectPointerPersonality];
   }
 
   return self;

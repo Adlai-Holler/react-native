@@ -407,8 +407,8 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
       return;
     }
 
-    NSUInteger indexOfFrom = [self.reactSubviews indexOfObject:fromController.navItem];
-    NSUInteger indexOfTo = [self.reactSubviews indexOfObject:toController.navItem];
+    NSUInteger indexOfFrom = [self.reactSubviews indexOfObjectIdenticalTo:fromController.navItem];
+    NSUInteger indexOfTo = [self.reactSubviews indexOfObjectIdenticalTo:toController.navItem];
     CGFloat destination = indexOfFrom < indexOfTo ? 1.0 : -1.0;
     self->_dummyView.frame = (CGRect){{destination, 0}, CGSizeZero};
     self->_currentlyTransitioningFrom = indexOfFrom;

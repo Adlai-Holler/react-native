@@ -24,7 +24,7 @@
 // - The compile-time #ifdef's can't be used because an app compiled for iOS8 can still run on iOS9
 
 static BOOL isStreamTaskSupported() {
-  return [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){9,0,0}];
+  return NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_9_0;
 }
 
 @implementation RCTMultipartDataTask {
@@ -69,14 +69,19 @@ didReceiveResponse:(NSURLResponse *)response
     _statusCode = [httpResponse statusCode];
 
     NSString *contentType = @"";
-    for (NSString *key in [_headers keyEnumerator]) {
-      if ([[key lowercaseString] isEqualToString:@"content-type"]) {
+    for (NSString *key in _headers) {
+      if ([key caseInsensitiveCompare:@"content-type"] == NSOrderedSame) {
         contentType = [_headers valueForKey:key];
         break;
       }
     }
 
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"multipart/mixed;.*boundary=\"([^\"]+)\"" options:0 error:nil];
+    static NSRegularExpression *regex;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+      regex = [NSRegularExpression regularExpressionWithPattern:@"multipart/mixed;.*boundary=\"([^\"]+)\"" options:kNilOptions error:NULL];
+    });
+
     NSTextCheckingResult *match = [regex firstMatchInString:contentType options:0 range:NSMakeRange(0, contentType.length)];
     if (match) {
       _boundary = [contentType substringWithRange:[match rangeAtIndex:1]];

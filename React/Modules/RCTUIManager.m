@@ -70,7 +70,7 @@ NSString *const RCTUIManagerWillUpdateViewsDueToContentSizeMultiplierChangeNotif
   // Keyed by viewName
   NSDictionary *_componentDataByName;
 
-  NSMutableSet<id<RCTComponent>> *_bridgeTransactionListeners;
+  NSHashTable<id<RCTComponent>> *_bridgeTransactionListeners;
 }
 
 @synthesize bridge = _bridge;
@@ -133,7 +133,7 @@ RCT_EXPORT_MODULE()
   _pendingUIBlocks = [NSMutableArray new];
   _rootViewTags = [NSMutableSet new];
 
-  _bridgeTransactionListeners = [NSMutableSet new];
+  _bridgeTransactionListeners = [NSHashTable hashTableWithOptions:NSHashTableObjectPointerPersonality];
   _observerCoordinator = [RCTUIManagerObserverCoordinator new];
 
   // Get view managers from bridge
@@ -239,13 +239,8 @@ dispatch_queue_t RCTGetUIManagerQueue(void)
   static dispatch_queue_t shadowQueue;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    if ([NSOperation instancesRespondToSelector:@selector(qualityOfService)]) {
-      dispatch_queue_attr_t attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INTERACTIVE, 0);
-      shadowQueue = dispatch_queue_create(RCTUIManagerQueueName, attr);
-    } else {
-      shadowQueue = dispatch_queue_create(RCTUIManagerQueueName, DISPATCH_QUEUE_SERIAL);
-      dispatch_set_target_queue(shadowQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
-    }
+    dispatch_queue_attr_t attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INTERACTIVE, 0);
+    shadowQueue = dispatch_queue_create(RCTUIManagerQueueName, attr);
   });
   return shadowQueue;
 }
@@ -763,7 +758,7 @@ RCT_EXPORT_METHOD(removeSubviewsFromContainerWithID:(nonnull NSNumber *)containe
     // So, let's temporary restore the view back after removing.
     // To do so, we have to memorize original `superview` (which can differ from `container`) and an index of removed view.
     UIView *originalSuperview = removedChild.superview;
-    NSUInteger *originalIndex = [originalSuperview.subviews indexOfObject:removedChild];
+    NSUInteger originalIndex = [originalSuperview.subviews indexOfObjectIdenticalTo:removedChild];
     [container removeReactSubview:removedChild];
     [originalSuperview insertSubview:removedChild atIndex:originalIndex];
 
@@ -816,7 +811,7 @@ RCT_EXPORT_METHOD(replaceExistingNonRootView:(nonnull NSNumber *)reactTag
     return;
   }
 
-  NSUInteger indexOfView = [superShadowView.reactSubviews indexOfObject:shadowView];
+  NSUInteger indexOfView = [superShadowView.reactSubviews indexOfObjectIdenticalTo:shadowView];
   RCTAssert(indexOfView != NSNotFound, @"View's superview doesn't claim it as subview (id %@)", reactTag);
   NSArray<NSNumber *> *removeAtIndices = @[@(indexOfView)];
   NSArray<NSNumber *> *addTags = @[newReactTag];
@@ -965,9 +960,8 @@ RCT_EXPORT_METHOD(createView:(nonnull NSNumber *)reactTag
     UIView *view = [componentData createViewWithTag:reactTag];
     if (view) {
       [componentData setProps:props forView:view]; // Must be done before bgColor to prevent wrong default
-      if ([view respondsToSelector:@selector(setBackgroundColor:)]) {
-        ((UIView *)view).backgroundColor = backgroundColor;
-      }
+      view.backgroundColor = backgroundColor;
+
       if ([view respondsToSelector:@selector(reactBridgeDidFinishTransaction)]) {
         [uiManager->_bridgeTransactionListeners addObject:view];
       }
@@ -1075,7 +1069,7 @@ RCT_EXPORT_METHOD(dispatchViewManagerCommand:(nonnull NSNumber *)reactTag
 {
   // Gather blocks to be executed now that all view hierarchy manipulations have
   // been completed (note that these may still take place before layout has finished)
-  for (RCTComponentData *componentData in _componentDataByName.allValues) {
+  for (RCTComponentData *componentData in [_componentDataByName objectEnumerator]) {
     RCTViewManagerUIBlock uiBlock = [componentData uiBlockToAmendWithShadowViewRegistry:_shadowViewRegistry];
     [self addUIBlock:uiBlock];
   }

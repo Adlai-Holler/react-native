@@ -177,7 +177,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 
 - (BOOL)tabBarController:(UITabBarController *)tabBarController shouldSelectViewController:(UIViewController *)viewController
 {
-  NSUInteger index = [tabBarController.viewControllers indexOfObject:viewController];
+  NSUInteger index = [tabBarController.viewControllers indexOfObjectIdenticalTo:viewController];
   RCTTabBarItem *tab = (RCTTabBarItem *)self.reactSubviews[index];
   if (tab.onPress) tab.onPress(nil);
   return NO;

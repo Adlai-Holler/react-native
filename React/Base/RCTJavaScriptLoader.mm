@@ -272,9 +272,9 @@ static NSURL *sanitizeURL(NSURL *url)
   return [RCTConvert NSURL:url.absoluteString];
 }
 
-static RCTLoadingProgress *progressEventFromData(NSData *rawData)
+static RCTLoadingProgress *progressEventFromData(NS_VALID_UNTIL_END_OF_SCOPE NSData *rawData)
 {
-  NSString *text = [[NSString alloc] initWithData:rawData encoding:NSUTF8StringEncoding];
+  NSString *text = [[NSString alloc] initWithBytesNoCopy:(void *)rawData.bytes length:rawData.length encoding:NSUTF8StringEncoding freeWhenDone:NO];
   id info = RCTJSONParse(text, nil);
   if (!info || ![info isKindOfClass:[NSDictionary class]]) {
     return nil;
