@@ -361,7 +361,6 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   CGRect _lastClippedToRect;
   uint16_t _coalescingKey;
   NSString *_lastEmittedEventName;
-  NSHashTable *_scrollListeners;
 }
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
@@ -395,8 +394,6 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
     _scrollEventThrottle = 0.0;
     _lastScrollDispatchTime = 0;
     _cachedChildFrames = [NSMutableArray new];
-
-    _scrollListeners = [NSHashTable weakObjectsHashTable];
 
     [self addSubview:_scrollView];
   }
@@ -603,32 +600,14 @@ static inline void RCTApplyTranformationAccordingLayoutDirection(UIView *view, U
   [self sendScrollEventWithName:eventName scrollView:_scrollView userData:_userData]; \
 }
 
-#define RCT_FORWARD_SCROLL_EVENT(call) \
-for (NSObject<UIScrollViewDelegate> *scrollViewListener in _scrollListeners) { \
-  if ([scrollViewListener respondsToSelector:_cmd]) { \
-    [scrollViewListener call]; \
-  } \
-}
-
 #define RCT_SCROLL_EVENT_HANDLER(delegateMethod, eventName) \
 - (void)delegateMethod:(UIScrollView *)scrollView           \
 {                                                           \
   RCT_SEND_SCROLL_EVENT(eventName, nil);                    \
-  RCT_FORWARD_SCROLL_EVENT(delegateMethod:scrollView);      \
 }
 
 RCT_SCROLL_EVENT_HANDLER(scrollViewWillBeginDecelerating, onMomentumScrollBegin)
 RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
-
-- (void)addScrollListener:(NSObject<UIScrollViewDelegate> *)scrollListener
-{
-  [_scrollListeners addObject:scrollListener];
-}
-
-- (void)removeScrollListener:(NSObject<UIScrollViewDelegate> *)scrollListener
-{
-  [_scrollListeners removeObject:scrollListener];
-}
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
@@ -654,8 +633,6 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
     _lastScrollDispatchTime = now;
     _allowNextScrollNoMatterWhat = NO;
   }
-
-  RCT_FORWARD_SCROLL_EVENT(scrollViewDidScroll:scrollView);
 }
 
 - (NSArray<NSDictionary *> *)calculateChildFramesData
@@ -690,11 +667,10 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
     return updatedChildFrames;
 }
 
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+- (void)scrollViewWillBeginDragging:(__unused UIScrollView *)scrollView
 {
   _allowNextScrollNoMatterWhat = YES; // Ensure next scroll event is recorded, regardless of throttle
   RCT_SEND_SCROLL_EVENT(onScrollBeginDrag, nil);
-  RCT_FORWARD_SCROLL_EVENT(scrollViewWillBeginDragging:scrollView);
 }
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
@@ -752,24 +728,16 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
     }
   };
   RCT_SEND_SCROLL_EVENT(onScrollEndDrag, userData);
-  RCT_FORWARD_SCROLL_EVENT(scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset);
 }
 
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
-{
-  RCT_FORWARD_SCROLL_EVENT(scrollViewDidEndDragging:scrollView willDecelerate:decelerate);
-}
-
-- (void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(UIView *)view
+- (void)scrollViewWillBeginZooming:(__unused UIScrollView *)scrollView withView:(__unused UIView *)view
 {
   RCT_SEND_SCROLL_EVENT(onScrollBeginDrag, nil);
-  RCT_FORWARD_SCROLL_EVENT(scrollViewWillBeginZooming:scrollView withView:view);
 }
 
-- (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(CGFloat)scale
+- (void)scrollViewDidEndZooming:(__unused UIScrollView *)scrollView withView:(__unused UIView *)view atScale:(__unused CGFloat)scale
 {
   RCT_SEND_SCROLL_EVENT(onScrollEndDrag, nil);
-  RCT_FORWARD_SCROLL_EVENT(scrollViewDidEndZooming:scrollView withView:view atScale:scale);
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
@@ -780,7 +748,6 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
 
   // Fire the end deceleration event
   RCT_SEND_SCROLL_EVENT(onMomentumScrollEnd, nil);
-  RCT_FORWARD_SCROLL_EVENT(scrollViewDidEndDecelerating:scrollView);
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
@@ -791,18 +758,6 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
 
   // Fire the end deceleration event
   RCT_SEND_SCROLL_EVENT(onMomentumScrollEnd, nil);
-  RCT_FORWARD_SCROLL_EVENT(scrollViewDidEndScrollingAnimation:scrollView);
-}
-
-- (BOOL)scrollViewShouldScrollToTop:(UIScrollView *)scrollView
-{
-  for (NSObject<UIScrollViewDelegate> *scrollListener in _scrollListeners) {
-    if ([scrollListener respondsToSelector:_cmd] &&
-        ![scrollListener scrollViewShouldScrollToTop:scrollView]) {
-      return NO;
-    }
-  }
-  return YES;
 }
 
 - (UIView *)viewForZoomingInScrollView:(__unused UIScrollView *)scrollView
@@ -817,8 +772,7 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
   CGSize viewportSize = self.bounds.size;
   if (_automaticallyAdjustContentInsets) {
     UIEdgeInsets contentInsets = [RCTView contentInsetsForView:self];
-    viewportSize = CGSizeMake(self.bounds.size.width - contentInsets.left - contentInsets.right,
-                                self.bounds.size.height - contentInsets.top - contentInsets.bottom);
+    viewportSize = UIEdgeInsetsInsetRect(self.bounds, contentInsets).size;
   }
   return viewportSize;
 }
